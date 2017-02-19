@@ -8,14 +8,16 @@ import android.view.SurfaceHolder;
 
 import java.io.IOException;
 
-/**
- * Created by BERTRAND on 11/02/2017.
- */
-
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder surfaceHolder;
     private Camera camera;
 
+    /**
+     * Constructor to link camera instantiation with preview.
+     *
+     * @param context Application's context
+     * @param camera  source camera
+     */
     public CameraPreview(Context context, Camera camera) {
         super(context);
         this.camera = camera;
@@ -24,6 +26,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         surfaceHolder.addCallback(this);
     }
 
+    /**
+     * This is called immediately after the surface is first created.
+     *
+     * @param surfaceHolder The SurfaceHolder whose surface is being created
+     */
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
         try {

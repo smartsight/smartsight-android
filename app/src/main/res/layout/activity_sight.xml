@@ -13,35 +13,37 @@
 
     <TextView
         android:id="@+id/result"
-        android:padding="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="100dp"
         android:background="@color/colorPrimary"
+        android:padding="10dp"
         android:textColor="#FFFFFF"
         android:visibility="invisible" />
 
     <ImageView
         android:id="@+id/btn_sight"
-        android:src="@mipmap/ic_launcher"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"/>
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:src="@mipmap/ic_launcher" />
 
     <RelativeLayout
         android:id="@+id/result_view"
-        android:layout_marginTop="150dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="invisible"
-        android:background="@color/colorPrimary">
+        android:layout_marginTop="150dp"
+        android:background="@color/colorPrimary"
+        android:visibility="invisible">
+
         <ListView
             android:id="@+id/list_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
+            
         </ListView>
 
         <ImageView

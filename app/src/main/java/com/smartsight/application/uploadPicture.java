@@ -28,25 +28,28 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 
-public class uploadPicture extends AsyncTask<String, String, String> {
+public class UploadPicture extends AsyncTask<String, String, String> {
 
-    private final String STRING_URL = "http://192.168.1.2:3000/classify";
-
-    private OkHttpClient httpClient;
+    private String serverURL;
 
     private SightActivity sightInstance;
 
-    private ImageView img_Sight;
+    private ImageView imgSnap;
     private ListView listView;
     private TextView result;
 
-    public uploadPicture(SightActivity mainAcivity, ImageView imgView, ListView listView, TextView textView) {
+    public UploadPicture(SightActivity mainAcivity, ImageView imgView, ListView listView, TextView textView) {
         this.sightInstance = mainAcivity;
-        this.img_Sight = imgView;
+        this.imgSnap = imgView;
         this.listView = listView;
         this.result = textView;
+        this.serverURL = "http://" + Helper.getConfigValue(mainAcivity, "server_ip") + ":"
+                + Helper.getConfigValue(mainAcivity, "server_port") + "/classify";
     }
 
+    /**
+     * Launch loading animation for uploading.
+     */
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
@@ -55,10 +58,16 @@ public class uploadPicture extends AsyncTask<String, String, String> {
         animation.setRepeatCount(-1);
         animation.setFillAfter(true);
 
-        img_Sight.setAnimation(animation);
-        img_Sight.startAnimation(animation);
+        imgSnap.setAnimation(animation);
+        imgSnap.startAnimation(animation);
     }
 
+    /**
+     * Background task that upload and wait server's response
+     *
+     * @param strings File path
+     * @return JSON response
+     */
     @Override
     protected String doInBackground(String... strings) {
         Log.d("PATHTOSEND", strings[0]);
@@ -70,15 +79,16 @@ public class uploadPicture extends AsyncTask<String, String, String> {
                 .build();
 
         Request req = new Request.Builder()
-                .url(STRING_URL)
+                .url(serverURL)
                 .post(postImage)
                 .build();
 
         try {
+            OkHttpClient httpClient;
             httpClient = new OkHttpClient.Builder()
-                    .connectTimeout(5, TimeUnit.MINUTES)
-                    .writeTimeout(5, TimeUnit.MINUTES)
-                    .readTimeout(5, TimeUnit.MINUTES)
+                    .connectTimeout(3, TimeUnit.MINUTES)
+                    .writeTimeout(3, TimeUnit.MINUTES)
+                    .readTimeout(3, TimeUnit.MINUTES)
                     .build();
             Response resp = httpClient.newCall(req).execute();
             if (!resp.isSuccessful()) throw new IOException("Unexpected code " + resp);
@@ -92,10 +102,14 @@ public class uploadPicture extends AsyncTask<String, String, String> {
         return null;
     }
 
+    /**
+     * JSON parsing process & stop loading animation.
+     *
+     * @param s JSON datas to display
+     */
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        // TODO IF s IS NULL
         if (s == null) {
             sightInstance.restartCamera();
         } else {
@@ -116,10 +130,10 @@ public class uploadPicture extends AsyncTask<String, String, String> {
                 Log.d("TAG", arr.toString());
                 result.setText(arr.getJSONObject(0).getString("class") + " : " + arr.getJSONObject(0).getString("score"));
                 result.setVisibility(View.VISIBLE);
-                img_Sight.setImageResource(R.drawable.btn_newcamera);
+                imgSnap.setImageResource(R.drawable.btn_newcamera);
 
                 ArrayList<String> scores = new ArrayList<>();
-                for(int i=0; i < arr.length() ; i++) {
+                for (int i = 0; i < arr.length(); i++) {
                     JSONObject jsonO = arr.getJSONObject(i);
                     String classe = jsonO.getString("class");
                     String score = jsonO.getString("score");
@@ -133,11 +147,11 @@ public class uploadPicture extends AsyncTask<String, String, String> {
                 e.printStackTrace();
                 sightInstance.restartCamera();
                 result.setVisibility(View.INVISIBLE);
-                img_Sight.setImageResource(R.mipmap.ic_launcher);
+                imgSnap.setImageResource(R.mipmap.ic_launcher);
             }
         }
 
-        img_Sight.setOnClickListener(sightInstance);
-        img_Sight.clearAnimation();
+        imgSnap.setOnClickListener(sightInstance);
+        imgSnap.clearAnimation();
     }
 }
