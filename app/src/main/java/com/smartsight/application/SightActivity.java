@@ -66,6 +66,10 @@ public class SightActivity extends AppCompatActivity implements View.OnClickList
         } catch (Exception e) {
             Log.e("CAMERA", "No camera available");
         }
+
+        Camera.Parameters parameters = camera.getParameters();
+        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        camera.setParameters(parameters);
         return camera;
     }
 
@@ -77,7 +81,6 @@ public class SightActivity extends AppCompatActivity implements View.OnClickList
      */
     @Override
     public void onPictureTaken(byte[] bytes, Camera camera) {
-        // TODO AUTO FOCUS
         File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
         if (pictureFile == null) {
             Log.d("Write permission", "Error creating media file, check storage permissions: ");
