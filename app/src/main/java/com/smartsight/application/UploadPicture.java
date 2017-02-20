@@ -11,7 +11,6 @@ import android.view.animation.RotateAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,33 +30,34 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-
 public class UploadPicture extends AsyncTask<String, String, String> {
 
-    private String serverURL;
-
+    private String endpoint;
     private SightActivity sightInstance;
 
     private ImageView imgSnap;
     private ListView listView;
     private TextView result;
 
-    public UploadPicture(SightActivity mainAcivity, ImageView imgView, ListView listView, TextView textView) {
-        this.sightInstance = mainAcivity;
+    public UploadPicture(SightActivity mainActivity, ImageView imgView, ListView listView, TextView textView) {
+        this.sightInstance = mainActivity;
         this.imgSnap = imgView;
         this.listView = listView;
         this.result = textView;
-        this.serverURL = "http://" + Helper.getConfigValue(mainAcivity, "server_ip") + ":"
-                + Helper.getConfigValue(mainAcivity, "server_port") + "/classify";
+        this.endpoint = "http://" +
+                Helper.getConfigValue(mainActivity, "server_ip") + ":" +
+                Helper.getConfigValue(mainActivity, "server_port") +
+                Helper.getConfigValue(mainActivity, "server_route_classify");
     }
 
     /**
-     * Launch loading animation for uploading.
+     * Triggers the loading animation when requesting the server.
      */
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        Animation animation = new RotateAnimation(0.0f, 360.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+
+        final Animation animation = new RotateAnimation(0.0f, 360.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         animation.setDuration(3000);
         animation.setRepeatCount(-1);
         animation.setFillAfter(true);
@@ -67,7 +67,7 @@ public class UploadPicture extends AsyncTask<String, String, String> {
     }
 
     /**
-     * Background task that upload and wait server's response
+     * Uploads the image and waits for the server's response in the background.
      *
      * @param strings File path
      * @return JSON response or the error
@@ -76,14 +76,18 @@ public class UploadPicture extends AsyncTask<String, String, String> {
     protected String doInBackground(String... strings) {
         Log.d("PATHTOSEND", strings[0]);
 
-        MediaType MEDIA_TYPE_JPG = MediaType.parse("image/jpeg");
-        RequestBody postImage = new MultipartBody.Builder()
+        final MediaType MEDIA_TYPE_JPG = MediaType.parse("image/jpeg");
+        final RequestBody postImage = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart("file", "pic.jpg", RequestBody.create(MEDIA_TYPE_JPG, new File(strings[0])))
+                .addFormDataPart(
+                    "file",
+                    Helper.getConfigValue(sightInstance, "sm_picture_filename"),
+                    RequestBody.create(MEDIA_TYPE_JPG, new File(strings[0]))
+                )
                 .build();
 
-        Request req = new Request.Builder()
-                .url(serverURL)
+        final Request req = new Request.Builder()
+                .url(endpoint)
                 .post(postImage)
                 .build();
 
@@ -92,17 +96,22 @@ public class UploadPicture extends AsyncTask<String, String, String> {
         }
 
         try {
-            OkHttpClient httpClient;
-            httpClient = new OkHttpClient.Builder()
+            final OkHttpClient httpClient = new OkHttpClient.Builder()
                     .connectTimeout(3, TimeUnit.MINUTES)
                     .writeTimeout(3, TimeUnit.MINUTES)
                     .readTimeout(3, TimeUnit.MINUTES)
                     .build();
-            Response resp = httpClient.newCall(req).execute();
-            if (!resp.isSuccessful()) throw new IOException("Unexpected code " + resp);
-            String jsonResp = resp.body().string();
+
+            final Response resp = httpClient.newCall(req).execute();
+
+            if (!resp.isSuccessful()) {
+                throw new IOException("Unexpected code: " + resp);
+            }
+
+            final String jsonResp = resp.body().string();
             resp.close();
             Log.d("JSON", jsonResp);
+
             return jsonResp;
         } catch (IOException ioe) {
             ioe.printStackTrace();
@@ -111,51 +120,72 @@ public class UploadPicture extends AsyncTask<String, String, String> {
     }
 
     /**
-     * JSON parsing process & stop loading animation.
+     * Handles the server's response.
+     * Parses the JSON data and stops the loading animation.
      *
-     * @param s JSON datas to display
+     * Response in case of success:
+     * {
+     *   "meta": {
+     *       "type": "success",
+     *       "code": 200
+     *   },
+     *   "data": "[
+     *      {\"class\": \"pizza, pizza pie\", \"score\": 0.884148},
+     *      {\"class\": \"butcher shop, meat market\", \"score\": 0.002444},
+     *      {\"class\": \"carbonara\", \"score\": 0.00208},
+     *      {\"class\": \"trifle\", \"score\": 0.002078},
+     *      {\"class\": \"pomegranate\", \"score\": 0.001326}
+     *   ]"
+     * }
+     *
+     * Response in case of error:
+     * {
+     *   "error": {
+     *       "code": 415,
+     *       "message": "Unsupported Media Type (jpg, jpeg)"
+     *   }
+     * }
+     *
+     * @param response The response to process
      */
     @Override
-    protected void onPostExecute(String s) {
-        super.onPostExecute(s);
-        switch (s) {
+    protected void onPostExecute(String response) {
+        super.onPostExecute(response);
+
+        switch (response) {
             case "errorServer":
                 Toast.makeText(sightInstance, "Server unreachable", Toast.LENGTH_LONG).show();
                 sightInstance.restartCamera();
                 break;
+
             case "errorConnection":
                 Toast.makeText(sightInstance, "Check your connection", Toast.LENGTH_LONG).show();
                 sightInstance.restartCamera();
                 break;
+
             default:
                 try {
-                /*JSONArray arr = new JSONArray("[\n" +
-                    "  {\n" +
-                    "    \"class\": \"pizza\",\n" +
-                    "    \"confidence\": 0.97\n" +
-                    "  },\n" +
-                    "  {\n" +
-                    "    \"class\": \"plate\",\n" +
-                    "    \"confidence\": 0.76\n" +
-                    "  }\n" +
-                    "]");*/
-                    JSONObject jsonObject = new JSONObject(s);
-                    Log.d("ARR", jsonObject.getString("data"));
-                    JSONArray arr = new JSONArray(jsonObject.getString("data"));
-                    Log.d("TAG", arr.toString());
-                    result.setText(arr.getJSONObject(0).getString("class") + " : " + arr.getJSONObject(0).getString("score"));
+                    final JSONObject jsonResponse = new JSONObject(response);
+                    Log.d("ARR", jsonResponse.getString("data"));
+
+                    final JSONArray data = new JSONArray(jsonResponse.getString("data"));
+                    Log.d("TAG", data.toString());
+
+                    result.setText(data.getJSONObject(0).getString("class") + " (" + data.getJSONObject(0).getString("score") + ")");
                     result.setVisibility(View.VISIBLE);
                     imgSnap.setImageResource(R.drawable.btn_newcamera);
 
-                    ArrayList<String> scores = new ArrayList<>();
-                    for (int i = 0; i < arr.length(); i++) {
-                        JSONObject jsonO = arr.getJSONObject(i);
-                        String classe = jsonO.getString("class");
-                        String score = jsonO.getString("score");
-                        scores.add(classe + " : " + score);
+                    final ArrayList<String> scores = new ArrayList<>();
+
+                    for (int i = 0; i < data.length(); i++) {
+                        JSONObject jsonO = data.getJSONObject(i);
+                        final String prediction = jsonO.getString("class");
+                        final String score = jsonO.getString("score");
+
+                        scores.add(prediction + " (" + score + ")");
                     }
 
-                    ArrayAdapter<String> listAdapter = new ArrayAdapter<>(sightInstance,
+                    final ArrayAdapter<String> listAdapter = new ArrayAdapter<>(sightInstance,
                             android.R.layout.simple_expandable_list_item_1, scores);
                     listView.setAdapter(listAdapter);
                 } catch (JSONException e) {
@@ -171,9 +201,10 @@ public class UploadPicture extends AsyncTask<String, String, String> {
     }
 
     private boolean isConnected() {
-        ConnectivityManager connectivityManager
+        final ConnectivityManager connectivityManager
                 = (ConnectivityManager) sightInstance.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        final NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }
