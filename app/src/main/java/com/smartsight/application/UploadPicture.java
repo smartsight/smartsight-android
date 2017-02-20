@@ -1,5 +1,8 @@
 package com.smartsight.application;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
@@ -10,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,7 +70,7 @@ public class UploadPicture extends AsyncTask<String, String, String> {
      * Background task that upload and wait server's response
      *
      * @param strings File path
-     * @return JSON response
+     * @return JSON response or the error
      */
     @Override
     protected String doInBackground(String... strings) {
@@ -83,6 +87,10 @@ public class UploadPicture extends AsyncTask<String, String, String> {
                 .post(postImage)
                 .build();
 
+        if (!isConnected()) {
+            return "errorConnection";
+        }
+
         try {
             OkHttpClient httpClient;
             httpClient = new OkHttpClient.Builder()
@@ -98,8 +106,8 @@ public class UploadPicture extends AsyncTask<String, String, String> {
             return jsonResp;
         } catch (IOException ioe) {
             ioe.printStackTrace();
+            return "errorServer";
         }
-        return null;
     }
 
     /**
@@ -110,10 +118,17 @@ public class UploadPicture extends AsyncTask<String, String, String> {
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        if (s == null) {
-            sightInstance.restartCamera();
-        } else {
-            try {
+        switch (s) {
+            case "errorServer":
+                Toast.makeText(sightInstance, "Server unreachable", Toast.LENGTH_LONG).show();
+                sightInstance.restartCamera();
+                break;
+            case "errorConnection":
+                Toast.makeText(sightInstance, "Check your connection", Toast.LENGTH_LONG).show();
+                sightInstance.restartCamera();
+                break;
+            default:
+                try {
                 /*JSONArray arr = new JSONArray("[\n" +
                     "  {\n" +
                     "    \"class\": \"pizza\",\n" +
@@ -124,34 +139,41 @@ public class UploadPicture extends AsyncTask<String, String, String> {
                     "    \"confidence\": 0.76\n" +
                     "  }\n" +
                     "]");*/
-                JSONObject jsonObject = new JSONObject(s);
-                Log.d("ARR", jsonObject.getString("data"));
-                JSONArray arr = new JSONArray(jsonObject.getString("data"));
-                Log.d("TAG", arr.toString());
-                result.setText(arr.getJSONObject(0).getString("class") + " : " + arr.getJSONObject(0).getString("score"));
-                result.setVisibility(View.VISIBLE);
-                imgSnap.setImageResource(R.drawable.btn_newcamera);
+                    JSONObject jsonObject = new JSONObject(s);
+                    Log.d("ARR", jsonObject.getString("data"));
+                    JSONArray arr = new JSONArray(jsonObject.getString("data"));
+                    Log.d("TAG", arr.toString());
+                    result.setText(arr.getJSONObject(0).getString("class") + " : " + arr.getJSONObject(0).getString("score"));
+                    result.setVisibility(View.VISIBLE);
+                    imgSnap.setImageResource(R.drawable.btn_newcamera);
 
-                ArrayList<String> scores = new ArrayList<>();
-                for (int i = 0; i < arr.length(); i++) {
-                    JSONObject jsonO = arr.getJSONObject(i);
-                    String classe = jsonO.getString("class");
-                    String score = jsonO.getString("score");
-                    scores.add(classe + " : " + score);
+                    ArrayList<String> scores = new ArrayList<>();
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject jsonO = arr.getJSONObject(i);
+                        String classe = jsonO.getString("class");
+                        String score = jsonO.getString("score");
+                        scores.add(classe + " : " + score);
+                    }
+
+                    ArrayAdapter<String> listAdapter = new ArrayAdapter<>(sightInstance,
+                            android.R.layout.simple_expandable_list_item_1, scores);
+                    listView.setAdapter(listAdapter);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    sightInstance.restartCamera();
+                    result.setVisibility(View.INVISIBLE);
+                    imgSnap.setImageResource(R.mipmap.ic_launcher);
                 }
-
-                ArrayAdapter<String> listAdapter = new ArrayAdapter<>(sightInstance,
-                        android.R.layout.simple_expandable_list_item_1, scores);
-                listView.setAdapter(listAdapter);
-            } catch (JSONException e) {
-                e.printStackTrace();
-                sightInstance.restartCamera();
-                result.setVisibility(View.INVISIBLE);
-                imgSnap.setImageResource(R.mipmap.ic_launcher);
-            }
         }
 
         imgSnap.setOnClickListener(sightInstance);
         imgSnap.clearAnimation();
+    }
+
+    private boolean isConnected() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) sightInstance.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }
