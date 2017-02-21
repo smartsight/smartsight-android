@@ -173,7 +173,7 @@ public class UploadPicture extends AsyncTask<String, String, String> {
 
                     result.setText(data.getJSONObject(0).getString("class") + " (" + data.getJSONObject(0).getString("score") + ")");
                     result.setVisibility(View.VISIBLE);
-                    imgSnap.setImageResource(R.drawable.btn_newcamera);
+                    imgSnap.setImageResource(R.drawable.btn_restart);
 
                     final ArrayList<String> scores = new ArrayList<>();
 

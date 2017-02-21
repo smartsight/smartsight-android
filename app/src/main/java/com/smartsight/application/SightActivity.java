@@ -100,7 +100,7 @@ public class SightActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View view) {
         if (view == imgSnap) {
-            if (imgSnap.getDrawable().getConstantState() == getResources().getDrawable(R.drawable.btn_newcamera).getConstantState()) {
+            if (imgSnap.getDrawable().getConstantState() == getResources().getDrawable(R.drawable.btn_restart).getConstantState()) {
                 mainResult.setVisibility(View.INVISIBLE);
                 resultView.setVisibility(View.INVISIBLE);
                 restartCamera();
