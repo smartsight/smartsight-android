@@ -35,7 +35,7 @@ public class SightActivity extends AppCompatActivity implements View.OnClickList
     private ImageView btnCloseListView;
     private TextView mainResult;
 
-    private SightActivity thisInstance = this;
+    private final SightActivity thisInstance = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,47 +48,42 @@ public class SightActivity extends AppCompatActivity implements View.OnClickList
                     1);
         }
 
-        // TODO IF SDK < LOLLIPOP
-
+        // TODO: make compatible with SDK < Lollipop
     }
 
-    // TODO ONPAUSED ONRESUME...
+    // TODO: implement onPaused, onResume...
 
     /**
-     * Create a camera for the application.
+     * Creates a camera for the application.
      *
-     * @return the camera instantiation
+     * @return The camera instance
      */
     public static Camera newCamera() {
         Camera camera = null;
+
         try {
             camera = Camera.open();
+            final Camera.Parameters parameters = camera.getParameters();
+
+            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+            camera.setParameters(parameters);
         } catch (Exception e) {
             Log.e("CAMERA", "No camera available");
         }
-
-        Camera.Parameters parameters = camera.getParameters();
-        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-        camera.setParameters(parameters);
         return camera;
     }
 
-    /**
-     * Call when picture is taken.
-     *
-     * @param bytes  Picture's data in an bytes array
-     * @param camera Camera source of the picture
-     */
     @Override
     public void onPictureTaken(byte[] bytes, Camera camera) {
-        File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
+        final File pictureFile = getOutputMediaFile(thisInstance, MEDIA_TYPE_IMAGE);
+
         if (pictureFile == null) {
-            Log.d("Write permission", "Error creating media file, check storage permissions: ");
+            Log.d("Write permission", "Error creating media file, check storage permissions.");
             return;
         }
 
         try {
-            FileOutputStream fos = new FileOutputStream(pictureFile);
+            final FileOutputStream fos = new FileOutputStream(pictureFile);
             fos.write(bytes);
             fos.close();
         } catch (FileNotFoundException e) {
@@ -96,7 +91,9 @@ public class SightActivity extends AppCompatActivity implements View.OnClickList
         } catch (IOException e) {
             Log.d("NOACCESS", "Error accessing file: " + e.getMessage());
         }
+
         Log.d("PATH", pictureFile.getPath());
+
         new UploadPicture(thisInstance, imgSnap, listAllResults, mainResult).execute(pictureFile.getPath());
     }
 
@@ -119,88 +116,68 @@ public class SightActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    /**
-     * Asks user for permissions.
-     *
-     * @param requestCode
-     * @param permissions
-     * @param grantResults
-     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case 1:
-                if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    finish();
-                } else {
-                    camera = newCamera();
+        if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+            finish();
+            return;
+        }
 
-                    preview = new CameraPreview(this, camera);
-                    FrameLayout displayPreview = (FrameLayout) findViewById(R.id.preview);
-                    displayPreview.addView(preview);
+        if (requestCode == 1) {
+            camera = newCamera();
 
-                    imgSnap = (ImageView) findViewById(R.id.btn_sight);
-                    imgSnap.setOnClickListener(this);
-                    ActivityCompat.requestPermissions(SightActivity.this,
-                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                            2);
-                    mainResult = (TextView) findViewById(R.id.result);
-                    mainResult.setOnClickListener(this);
-                    resultView = (RelativeLayout) findViewById(R.id.result_view);
-                    listAllResults = (ListView) findViewById(R.id.list_view);
-                    btnCloseListView = (ImageView) findViewById(R.id.btn_close);
-                    btnCloseListView.setOnClickListener(this);
-                }
-                break;
-            case 2:
-                if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    finish();
-                } else {
-                    ActivityCompat.requestPermissions(SightActivity.this,
-                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                            3);
-                }
-                break;
-            case 3:
-                if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    finish();
-                }
-                break;
-            default:
+            preview = new CameraPreview(this, camera);
+            final FrameLayout displayPreview = (FrameLayout) findViewById(R.id.preview);
+            displayPreview.addView(preview);
+
+            imgSnap = (ImageView) findViewById(R.id.btn_sight);
+            imgSnap.setOnClickListener(this);
+            ActivityCompat.requestPermissions(SightActivity.this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    2);
+            mainResult = (TextView) findViewById(R.id.result);
+            mainResult.setOnClickListener(this);
+            resultView = (RelativeLayout) findViewById(R.id.result_view);
+            listAllResults = (ListView) findViewById(R.id.list_view);
+            btnCloseListView = (ImageView) findViewById(R.id.btn_close);
+            btnCloseListView.setOnClickListener(this);
+        } else if (requestCode == 2) {
+            ActivityCompat.requestPermissions(SightActivity.this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    3);
         }
     }
 
     /**
-     * Create, get directory & file where picture will be save.
+     * Returns the path of the new saved picture.
      *
-     * @param type File type
-     * @return the file for the picture
+     * @param type The file type
+     * @return the path to the picture
      */
-    private static File getOutputMediaFile(int type) {
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+    private static File getOutputMediaFile(SightActivity activity, final int type) {
+        final File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES), "SmartSight");
+
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
-                Log.d("MakeDir", "failed to create directory");
+                Log.d("MakeDir", "Failed to create directory");
                 return null;
             }
         }
 
         File mediaFile;
-        /*
-        Picture localisation in Android explorer
-        sdcard/Pictures/SmartSight
-         */
+        // Picture localization in Android explorer: sdcard/Pictures/SmartSight
         if (type == MEDIA_TYPE_IMAGE) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator + "pic.jpg");
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator + Helper.getConfigValue(activity, "sm_picture_filename"));
         } else {
             return null;
         }
+
         return mediaFile;
     }
 
     /**
-     * Restart preview to take new picture.
+     * Restarts preview to take a new picture.
      */
     public void restartCamera() {
         camera.startPreview();

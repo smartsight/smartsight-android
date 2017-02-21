@@ -9,14 +9,15 @@ import android.view.SurfaceHolder;
 import java.io.IOException;
 
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
+
     private SurfaceHolder surfaceHolder;
     private Camera camera;
 
     /**
      * Constructor to link camera instantiation with preview.
      *
-     * @param context Application's context
-     * @param camera  source camera
+     * @param context The context of the application
+     * @param camera The source camera
      */
     public CameraPreview(Context context, Camera camera) {
         super(context);
@@ -26,11 +27,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         surfaceHolder.addCallback(this);
     }
 
-    /**
-     * This is called immediately after the surface is first created.
-     *
-     * @param surfaceHolder The SurfaceHolder whose surface is being created
-     */
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
         try {
@@ -38,12 +34,12 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             camera.setPreviewDisplay(surfaceHolder);
             camera.startPreview();
         } catch (IOException ioe) {
-            Log.e("PREVIEW", "Error create preview :" + ioe.getMessage());
+            Log.e("PREVIEW", "Error creating preview: " + ioe.getMessage());
         }
     }
 
     @Override
-    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int width, int height) {
+    public void surfaceChanged(SurfaceHolder surfaceHolder, final int i, final int width, final int height) {
         if (surfaceHolder.getSurface() == null) {
             return;
         }
@@ -51,14 +47,14 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         try {
             camera.stopPreview();
         } catch (Exception e) {
-            Log.e("PREVIEW", "Error change preview : " + e.getMessage());
+            Log.e("PREVIEW", "Error changing preview: " + e.getMessage());
         }
 
         try {
             camera.setPreviewDisplay(this.surfaceHolder);
             camera.startPreview();
         } catch (IOException ioe) {
-            Log.e("PREVIEW", "Error change preview :" + ioe.getMessage());
+            Log.e("PREVIEW", "Error changing preview: " + ioe.getMessage());
         }
     }
 
@@ -66,4 +62,5 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
 
     }
+
 }
