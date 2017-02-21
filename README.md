@@ -6,4 +6,4 @@
 
 ## License
 
-GNU © SmartSight
+GPL © SmartSight
