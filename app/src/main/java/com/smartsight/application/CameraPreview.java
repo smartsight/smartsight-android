@@ -17,7 +17,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
      * Constructor to link camera instantiation with preview.
      *
      * @param context The context of the application
-     * @param camera The source camera
+     * @param camera  The source camera
      */
     public CameraPreview(Context context, Camera camera) {
         super(context);
@@ -59,8 +59,5 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     @Override
-    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-
-    }
-
+    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {}
 }

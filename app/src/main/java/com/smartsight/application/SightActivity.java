@@ -70,6 +70,7 @@ public class SightActivity extends AppCompatActivity implements View.OnClickList
         } catch (Exception e) {
             Log.e("CAMERA", "No camera available");
         }
+
         return camera;
     }
 
@@ -182,5 +183,4 @@ public class SightActivity extends AppCompatActivity implements View.OnClickList
     public void restartCamera() {
         camera.startPreview();
     }
-
 }

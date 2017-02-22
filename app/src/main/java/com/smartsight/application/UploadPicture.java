@@ -58,7 +58,7 @@ public class UploadPicture extends AsyncTask<String, String, String> {
         super.onPreExecute();
 
         final Animation animation = new RotateAnimation(0.0f, 360.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-        animation.setDuration(3000);
+        animation.setDuration(2000);
         animation.setRepeatCount(-1);
         animation.setFillAfter(true);
 
@@ -69,96 +69,97 @@ public class UploadPicture extends AsyncTask<String, String, String> {
     /**
      * Uploads the image and waits for the server's response in the background.
      *
-     * @param strings File path
-     * @return JSON response or the error
+     * @param pathnames The array of file path names
+     * @return The JSON response or an error
      */
     @Override
-    protected String doInBackground(String... strings) {
-        Log.d("PATHTOSEND", strings[0]);
+    protected String doInBackground(String... pathnames) {
+        Log.d("PATHTOSEND", pathnames[0]);
 
         final MediaType MEDIA_TYPE_JPG = MediaType.parse("image/jpeg");
-        final RequestBody postImage = new MultipartBody.Builder()
+        final RequestBody picture = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart(
-                    "file",
-                    Helper.getConfigValue(sightInstance, "sm_picture_filename"),
-                    RequestBody.create(MEDIA_TYPE_JPG, new File(strings[0]))
+                        "file",
+                        Helper.getConfigValue(sightInstance, "sm_picture_filename"),
+                        RequestBody.create(MEDIA_TYPE_JPG, new File(pathnames[0]))
                 )
                 .build();
 
-        final Request req = new Request.Builder()
+        final Request request = new Request.Builder()
                 .url(endpoint)
-                .post(postImage)
+                .post(picture)
                 .build();
 
         if (!isConnected()) {
-            return "errorConnection";
+            return "connectionError";
         }
 
         try {
-            final OkHttpClient httpClient = new OkHttpClient.Builder()
+            final OkHttpClient client = new OkHttpClient.Builder()
                     .connectTimeout(3, TimeUnit.MINUTES)
                     .writeTimeout(3, TimeUnit.MINUTES)
                     .readTimeout(3, TimeUnit.MINUTES)
                     .build();
 
-            final Response resp = httpClient.newCall(req).execute();
+            final Response response = client.newCall(request).execute();
 
-            if (!resp.isSuccessful()) {
-                throw new IOException("Unexpected code: " + resp);
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code: " + response);
             }
 
-            final String jsonResp = resp.body().string();
-            resp.close();
-            Log.d("JSON", jsonResp);
+            final String jsonResponse = response.body().string();
+            response.close();
+            Log.d("JSON", jsonResponse);
 
-            return jsonResp;
+            return jsonResponse;
         } catch (IOException ioe) {
             ioe.printStackTrace();
-            return "errorServer";
+            return "serverError";
         }
     }
 
     /**
      * Handles the server's response.
      * Parses the JSON data and stops the loading animation.
-     *
+     * <p>
      * Response in case of success:
      * {
-     *   "meta": {
-     *       "type": "success",
-     *       "code": 200
-     *   },
-     *   "data": "[
-     *      {\"class\": \"pizza, pizza pie\", \"score\": 0.884148},
-     *      {\"class\": \"butcher shop, meat market\", \"score\": 0.002444},
-     *      {\"class\": \"carbonara\", \"score\": 0.00208},
-     *      {\"class\": \"trifle\", \"score\": 0.002078},
-     *      {\"class\": \"pomegranate\", \"score\": 0.001326}
-     *   ]"
+     * "meta": {
+     * "type": "success",
+     * "code": 200
+     * },
+     * "data": "[
+     * {\"class\": \"pizza, pizza pie\", \"score\": 0.884148},
+     * {\"class\": \"butcher shop, meat market\", \"score\": 0.002444},
+     * {\"class\": \"carbonara\", \"score\": 0.00208},
+     * {\"class\": \"trifle\", \"score\": 0.002078},
+     * {\"class\": \"pomegranate\", \"score\": 0.001326}
+     * ]"
      * }
-     *
+     * <p>
      * Response in case of error:
      * {
-     *   "error": {
-     *       "code": 415,
-     *       "message": "Unsupported Media Type (jpg, jpeg)"
-     *   }
+     * "error": {
+     * "code": 415,
+     * "message": "Unsupported Media Type (jpg, jpeg)"
+     * }
      * }
      *
      * @param response The response to process
+     * @see <a href="https://github.com/smartsight/smartsight-api/wiki">SmartSight API Documentation</a>
      */
     @Override
-    protected void onPostExecute(String response) {
+    protected void onPostExecute(final String response) {
         super.onPostExecute(response);
 
         switch (response) {
-            case "errorServer":
+            case "serverError":
                 Toast.makeText(sightInstance, "Server unreachable", Toast.LENGTH_LONG).show();
                 sightInstance.restartCamera();
                 break;
 
-            case "errorConnection":
+            case "connectionError":
                 Toast.makeText(sightInstance, "Check your connection", Toast.LENGTH_LONG).show();
                 sightInstance.restartCamera();
                 break;
@@ -178,11 +179,11 @@ public class UploadPicture extends AsyncTask<String, String, String> {
                     final ArrayList<String> scores = new ArrayList<>();
 
                     for (int i = 0; i < data.length(); i++) {
-                        JSONObject jsonO = data.getJSONObject(i);
-                        final String prediction = jsonO.getString("class");
-                        final String score = jsonO.getString("score");
+                        final JSONObject prediction = data.getJSONObject(i);
+                        final String title = prediction.getString("class");
+                        final String score = prediction.getString("score");
 
-                        scores.add(prediction + " (" + score + ")");
+                        scores.add(title + " (" + score + ")");
                     }
 
                     final ArrayAdapter<String> listAdapter = new ArrayAdapter<>(sightInstance,
