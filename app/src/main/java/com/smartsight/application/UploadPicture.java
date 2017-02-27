@@ -44,8 +44,8 @@ public class UploadPicture extends AsyncTask<String, String, String> {
         this.imgSnap = imgView;
         this.listView = listView;
         this.result = textView;
-        this.endpoint = "http://" +
-                Helper.getConfigValue(mainActivity, "server_ip") + ":" +
+        this.endpoint =
+                Helper.getConfigValue(mainActivity, "server_host") + ":" +
                 Helper.getConfigValue(mainActivity, "server_port") +
                 Helper.getConfigValue(mainActivity, "server_route_classify");
     }
