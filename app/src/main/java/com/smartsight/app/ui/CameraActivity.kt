@@ -13,6 +13,7 @@ import android.widget.LinearLayout
 import com.smartsight.app.R
 import com.smartsight.app.R.string.no_camera
 import com.smartsight.app.R.string.no_permission
+import com.smartsight.app.R.string.file_error
 import com.smartsight.app.util.getOutputMediaFile
 import com.smartsight.app.util.hasCameraAndStoragePermission
 import com.smartsight.app.util.hasCameraPermission
@@ -128,19 +129,26 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener, Camera.Picture
     }
 
     override fun onPictureTaken(data: ByteArray, camera: Camera) {
-        try {
-            val picture: File = getOutputMediaFile(applicationContext)
-            val output: FileOutputStream = FileOutputStream(picture)
+        val picture = try {
+            getOutputMediaFile(applicationContext)
+        } catch (e: IOException) {
+            Log.e(TAG, "Can't access file $e")
+            showToast(applicationContext, file_error)
+            return
+        }
 
-            output.write(data)
-            output.close()
-
-            PhotoProcessor(mActivity.get()!!).execute(picture.path)
+        val output = try {
+            FileOutputStream(picture)
         } catch (e: FileNotFoundException) {
             Log.e(TAG, "File not found $e")
-        } catch (e: IOException) {
-            Log.e(TAG, "Cannot access file $e")
+            showToast(applicationContext, file_error)
+            return
         }
+
+        output.write(data)
+        output.close()
+
+        PhotoProcessor(mActivity.get()!!).execute(picture.path)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
