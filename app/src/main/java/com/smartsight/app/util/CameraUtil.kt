@@ -4,8 +4,8 @@ import android.hardware.Camera
 
 @Throws(Exception::class)
 fun createCamera(): Camera {
-    val camera: Camera = Camera.open()
-    val parameters: Camera.Parameters = camera.parameters
+    val camera = Camera.open()
+    val parameters = camera.parameters
 
     parameters.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
     camera.parameters = parameters

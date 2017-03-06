@@ -49,8 +49,9 @@ class PhotoProcessor(val activity: CameraActivity) : AsyncTask<String, String, S
             return "$check_connection"
         }
 
-        val mediaType: MediaType = MediaType.parse("image/jpeg")
-        val picture: RequestBody = MultipartBody.Builder()
+
+        val mediaType = MediaType.parse("image/jpeg")
+        val picture = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart(
                         "photo",
@@ -58,18 +59,18 @@ class PhotoProcessor(val activity: CameraActivity) : AsyncTask<String, String, S
                         RequestBody.create(mediaType, File(photoPath))
                 )
                 .build()
-        val request: Request = Request.Builder()
+        val request = Request.Builder()
                 .url(ENDPOINT)
                 .post(picture)
                 .build()
 
         try {
-            val client: OkHttpClient = OkHttpClient.Builder()
+            val client = OkHttpClient.Builder()
                     .connectTimeout(3, TimeUnit.MINUTES)
                     .writeTimeout(3, TimeUnit.MINUTES)
                     .readTimeout(3, TimeUnit.MINUTES)
                     .build()
-            val response: Response = client.newCall(request).execute()
+            val response = client.newCall(request).execute()
 
             if (!response.isSuccessful) {
                 Log.e(TAG, "Response from the server $response")
@@ -98,13 +99,13 @@ class PhotoProcessor(val activity: CameraActivity) : AsyncTask<String, String, S
         }
 
         try {
-            val response: JSONObject = JSONObject(result)
-            val data: JSONArray = JSONArray(response.getString("data"))
+            val response = JSONObject(result)
+            val data = JSONArray(response.getString("data"))
 
             val firstClassification = data.getJSONObject(0)
             activity.results_first.text = "${firstClassification.getString("class")} (${firstClassification.getString("score")})"
 
-            val predictions: MutableList<String> = mutableListOf()
+            val predictions = mutableListOf<String>()
 
             for (i in 1 until data.length()) {
                 val classification = data.getJSONObject(i)
@@ -114,7 +115,7 @@ class PhotoProcessor(val activity: CameraActivity) : AsyncTask<String, String, S
                 predictions.add("$prediction ($score)")
             }
 
-            val listAdapter: ListAdapter = ArrayAdapter(activity, android.R.layout.simple_expandable_list_item_1, predictions)
+            val listAdapter = ArrayAdapter(activity, android.R.layout.simple_expandable_list_item_1, predictions)
             activity.results_list.adapter = listAdapter
 
             activity.bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED

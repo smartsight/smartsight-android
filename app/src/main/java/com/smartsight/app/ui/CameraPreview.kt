@@ -12,7 +12,7 @@ class CameraPreview(context: Context, private val camera: Camera) : SurfaceView(
         private val TAG = CameraPreview::class.java.simpleName
     }
 
-    private val surfaceHolder: SurfaceHolder = holder
+    private val surfaceHolder = holder
 
     init {
         surfaceHolder.addCallback(this)

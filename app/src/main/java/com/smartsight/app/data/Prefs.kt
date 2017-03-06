@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 import android.os.Environment
 
 class Prefs(context: Context) {
-    private val mPrefs: SharedPreferences = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
+    private val mPrefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
 
     companion object {
         fun newInstance(context: Context) = Prefs(context)

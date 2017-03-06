@@ -22,7 +22,6 @@ import com.smartsight.app.util.createCamera
 import com.smartsight.app.util.restartCamera
 import kotlinx.android.synthetic.main.activity_camera.*
 import kotlinx.android.synthetic.main.list_results.*
-import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
@@ -37,7 +36,7 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener, Camera.Picture
         private val RESTART_TAG = R.drawable.ic_restart
     }
 
-    private val mActivity: WeakReference<CameraActivity> = WeakReference(this@CameraActivity)
+    private val mActivity = WeakReference(this@CameraActivity)
     private lateinit var cameraPreview: CameraPreview
     internal lateinit var camera: Camera
     internal lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
