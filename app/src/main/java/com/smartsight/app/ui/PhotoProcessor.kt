@@ -6,12 +6,11 @@ import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
 import android.widget.ArrayAdapter
-import android.widget.ListAdapter
-import com.smartsight.app.BuildConfig
 import com.smartsight.app.R
 import com.smartsight.app.R.string.*
 import com.smartsight.app.data.SM_PHOTO_NAME
 import com.smartsight.app.data.SM_SERVER_ROUTE_CLASSIFY
+import com.smartsight.app.data.SM_SERVER_URL
 import com.smartsight.app.util.isNetworkConnected
 import com.smartsight.app.util.restartCamera
 import com.smartsight.app.util.showToast
@@ -28,7 +27,7 @@ import java.util.concurrent.TimeUnit
 class PhotoProcessor(val activity: CameraActivity) : AsyncTask<String, String, String>() {
     companion object {
         private val TAG = PhotoProcessor::class.java.simpleName
-        private val ENDPOINT = "${BuildConfig.SM_SERVER_URL}$SM_SERVER_ROUTE_CLASSIFY"
+        private val ENDPOINT = "$SM_SERVER_URL$SM_SERVER_ROUTE_CLASSIFY"
     }
 
     lateinit var photoPath: String
