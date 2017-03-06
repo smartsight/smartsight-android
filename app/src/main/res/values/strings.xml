@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">SmartSight</string>
     <string name="snap">Snap</string>
+    <string name="check_connection">Check your connection</string>
+    <string name="server_unreachable">SmartSight server unreachable</string>
+    <string name="no_permission">Permission not granted</string>
+    <string name="no_camera">Can\'t access the camera</string>
+    <string name="server_error">Can\'t process this photo</string>
 </resources>
