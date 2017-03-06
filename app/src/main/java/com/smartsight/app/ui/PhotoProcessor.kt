@@ -5,6 +5,7 @@ import android.support.design.widget.BottomSheetBehavior
 import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
+import android.webkit.URLUtil
 import android.widget.ArrayAdapter
 import com.smartsight.app.R
 import com.smartsight.app.R.string.*
@@ -41,13 +42,19 @@ class PhotoProcessor(val activity: CameraActivity) : AsyncTask<String, String, S
     }
 
     override fun doInBackground(vararg pathnames: String): String {
-        photoPath = pathnames.first()
+        if (!URLUtil.isValidUrl(SM_SERVER_URL)) {
+            Log.e(TAG, "The server URL config is wrong: $SM_SERVER_URL.\n" +
+                    "See https://github.com/smartsight/smartsight-android#development-setup")
+            cancel(true)
+            return "$check_server_url"
+        }
 
         if (!isNetworkConnected(activity)) {
             cancel(true)
             return "$check_connection"
         }
 
+        photoPath = pathnames.first()
 
         val mediaType = MediaType.parse("image/jpeg")
         val picture = MultipartBody.Builder()
