@@ -4,7 +4,7 @@
 
 > SmartSight Android app in Kotlin
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](LICENSE.md)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](LICENSE)
 
 ## Development setup
 
