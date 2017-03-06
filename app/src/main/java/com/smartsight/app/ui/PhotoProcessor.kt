@@ -33,6 +33,9 @@ class PhotoProcessor(val activity: CameraActivity) : AsyncTask<String, String, S
 
     lateinit var photoPath: String
 
+    /**
+     * Triggers the loading animation before requesting the server.
+     */
     override fun onPreExecute() {
         val animation = RotateAnimation(0.0f, 360.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f)
         animation.duration = 2000
@@ -41,6 +44,12 @@ class PhotoProcessor(val activity: CameraActivity) : AsyncTask<String, String, S
         activity.snapImage.startAnimation(animation)
     }
 
+    /**
+     * Uploads the image and waits for the server's response in the background.
+     *
+     * @param pathnames The array of file path names
+     * @return the JSON response stringified or a corresponding error code
+     */
     override fun doInBackground(vararg pathnames: String): String {
         if (!URLUtil.isValidUrl(SM_SERVER_URL)) {
             Log.e(TAG, "The server URL config is wrong: $SM_SERVER_URL.\n" +
@@ -96,6 +105,17 @@ class PhotoProcessor(val activity: CameraActivity) : AsyncTask<String, String, S
         }
     }
 
+    /**
+     * Handles the server's response.
+     *
+     * This method does the following:
+     *  - Clear the view
+     *  - Delete the photo located at [photoPath]
+     *  - Parse the JSON response (see [SmartSight API Documentation](https://github.com/smartsight/smartsight-api/wiki))
+     *  - Add the classification results to the result list
+     *
+     * @param result The response from the server
+     */
     override fun onPostExecute(result: String) {
         clearView()
         activity.snapImage.setImageResource(R.drawable.ic_restart)
@@ -131,6 +151,11 @@ class PhotoProcessor(val activity: CameraActivity) : AsyncTask<String, String, S
         }
     }
 
+    /**
+     * Displays the error in a toast and restart the camera.
+     *
+     * This method is called if an error has occurred during the [doInBackground] method.
+     */
     override fun onCancelled(resId: String) {
         clearView()
         showToast(activity, resId.toInt())
