@@ -8,17 +8,20 @@
 
 ## Development setup
 
-You will need to define `SM_SERVER_URL` in the app [`build.gradle`](app/build.gradle). This constant is related to the address of the running [SmartSight API](https://github.com/smartsight/smartsight-api).
+You will need to define the server URL in the project [`build.gradle`](build.gradle) file. This constant corresponds to the address of the running [SmartSight API](https://github.com/smartsight/smartsight-api) ([see the default setup](https://github.com/smartsight/smartsight-api#development-setup)).
 
 ```groovy
-android {
-    buildTypes {
-        debug {
-            buildConfigField "String", "SM_SERVER_URL", "\"[address of the server]\""
-        }
-    }
+buildscript {
+    ext.serverUrl = [
+        debug: '[address of the server in debug mode]',
+        release: '[address of the server in release mode]'
+    ]
+
+    // ...
 }
 ```
+
+Sync your project and you're ready to go.
 
 ## License
 
