@@ -73,6 +73,14 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener, Camera.Picture
         })
     }
 
+    /**
+     * Tries to initialize the camera depending on the current permissions.
+     *
+     * We call [initView] if both [Manifest.permission.CAMERA] and
+     * [Manifest.permission.WRITE_EXTERNAL_STORAGE] are granted (see [hasCameraAndStoragePermission]).
+     *
+     * Otherwise, we ask the user for the permissions calling [ActivityCompat.requestPermissions].
+     */
     private fun tryInitCamera() {
         if (hasCameraAndStoragePermission(applicationContext)) {
             initView()
@@ -91,11 +99,18 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener, Camera.Picture
         }
     }
 
+    /**
+     * Initializes the camera and the preview.
+     *
+     * An action listener is set on the [snapImage] to take pictures.
+     *
+     * This method is called once the correct permissions are granted.
+     */
     private fun initView() {
         camera = try {
             createCamera()
         } catch (e: Exception) {
-            Log.e(TAG, "Cant access camera $e")
+            Log.e(TAG, "Can't access camera $e")
             showToast(applicationContext, no_camera)
             return
         }
@@ -107,12 +122,33 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener, Camera.Picture
         snapImage.tag = SNAP_TAG
     }
 
+    /**
+     * Reinitializes the state of the view.
+     *
+     * This method does the following:
+     *  - Set the [snapImage] source to its default
+     *  - Reset its tag to allow the user to take another picture
+     *  - Restart the camera
+     */
     private fun restartView() {
         snapImage.setImageResource(SNAP_TAG)
         snapImage.tag = SNAP_TAG
         restartCamera(camera)
     }
 
+    /**
+     * Handles the click event.
+     *
+     * [snapImage]:
+     *  [SNAP_TAG]:
+     *      - Set the [snapImage] tag to [RESTART_TAG] to change its behavior
+     *      - Disable the snapping feature
+     *      - Take the picture
+     *  [RESTART_TAG]:
+     *      - Restart the view
+     *      - Hide the results list
+     *      Note: we don't need the reset the tag here since it's handled by [restartView]
+     */
     override fun onClick(view: View) {
         when (view) {
             snapImage -> {
@@ -128,6 +164,11 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener, Camera.Picture
         }
     }
 
+    /**
+     * Creates a picture from the camera [data] and calls the [PhotoProcessor].
+     *
+     * This method is called when the camera has taken the picture.
+     */
     override fun onPictureTaken(data: ByteArray, camera: Camera) {
         val picture = try {
             getOutputMediaFile(applicationContext)
