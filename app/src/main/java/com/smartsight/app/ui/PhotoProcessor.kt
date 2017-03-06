@@ -84,7 +84,7 @@ class PhotoProcessor(val activity: CameraActivity) : AsyncTask<String, String, S
                 return "$server_error"
             }
 
-            val jsonResponse: String = response.body().string()
+            val jsonResponse = response.body().string()
 
             response.close()
 
