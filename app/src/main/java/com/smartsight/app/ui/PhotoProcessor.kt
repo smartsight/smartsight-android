@@ -112,7 +112,7 @@ class PhotoProcessor(val activity: CameraActivity) : AsyncTask<String, String, S
      *  - Clear the view
      *  - Delete the photo located at [photoPath]
      *  - Parse the JSON response (see [SmartSight API Documentation](https://github.com/smartsight/smartsight-api/wiki))
-     *  - Add the classification results to the result list
+     *  - Add the classification results to the results list
      *
      * @param result The response from the server
      */
@@ -152,9 +152,9 @@ class PhotoProcessor(val activity: CameraActivity) : AsyncTask<String, String, S
     }
 
     /**
-     * Displays the error in a toast and restart the camera.
+     * Displays the error in a toast and restarts the camera.
      *
-     * This method is called if an error has occurred during the [doInBackground] method.
+     * This method is called if an error occurs during the [doInBackground] method.
      */
     override fun onCancelled(resId: String) {
         clearView()
