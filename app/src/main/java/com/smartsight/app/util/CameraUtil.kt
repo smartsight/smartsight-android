@@ -14,3 +14,9 @@ fun createCamera(): Camera {
 }
 
 fun restartCamera(camera: Camera) = camera.startPreview()
+
+fun destroyCamera(camera: Camera) {
+    camera.stopPreview()
+    camera.setPreviewCallback(null)
+    camera.release()
+}

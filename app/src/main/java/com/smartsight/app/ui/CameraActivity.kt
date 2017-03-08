@@ -11,16 +11,8 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
 import com.smartsight.app.R
-import com.smartsight.app.R.string.no_camera
-import com.smartsight.app.R.string.no_permission
-import com.smartsight.app.R.string.file_error
-import com.smartsight.app.util.getOutputMediaFile
-import com.smartsight.app.util.hasCameraAndStoragePermission
-import com.smartsight.app.util.hasCameraPermission
-import com.smartsight.app.util.hasStoragePermission
-import com.smartsight.app.util.showToast
-import com.smartsight.app.util.createCamera
-import com.smartsight.app.util.restartCamera
+import com.smartsight.app.R.string.*
+import com.smartsight.app.util.*
 import kotlinx.android.synthetic.main.activity_camera.*
 import kotlinx.android.synthetic.main.list_results.*
 import java.io.FileNotFoundException
@@ -217,5 +209,6 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener, Camera.Picture
 
     override fun onDestroy() {
         super.onDestroy()
+        destroyCamera(camera)
     }
 }
