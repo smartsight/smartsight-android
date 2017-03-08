@@ -209,6 +209,11 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener, Camera.Picture
 
     override fun onDestroy() {
         super.onDestroy()
-        destroyCamera(camera)
+
+        try {
+            destroyCamera(camera)
+        } catch (e: RuntimeException) {
+            Log.e(TAG, "Unable to destroy camera because hasn't been initialized $e")
+        }
     }
 }
