@@ -197,6 +197,15 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener, Camera.Picture
         }
     }
 
+    override fun onBackPressed() {
+        if (snap_image.tag == RESTART_TAG) {
+            restartView()
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        } else {
+            super.onBackPressed()
+        }
+    }
+
     override fun onPause() {
         super.onPause()
         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
