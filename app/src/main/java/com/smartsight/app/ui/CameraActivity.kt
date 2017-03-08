@@ -56,19 +56,19 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener, Camera.Picture
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
-                        val transX = ((bottomSheet.width / 2) - (snapImage.width / 2) - 16).toFloat()
-                        snapImage.animate().translationX(transX)
+                        val transX = ((bottomSheet.width / 2) - (snap_image.width / 2) - 16).toFloat()
+                        snap_image.animate().translationX(transX)
                     }
                     BottomSheetBehavior.STATE_HIDDEN -> {
-                        snapImage.animate().translationX(0f)
+                        snap_image.animate().translationX(0f)
                         restartView()
                     }
                 }
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                activity_main.bringChildToFront(bottomSheet)
-                activity_main.bringChildToFront(snapImage)
+                activity_main.bringChildToFront(bottom_sheet)
+                activity_main.bringChildToFront(snap_image)
             }
         })
     }
@@ -102,7 +102,7 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener, Camera.Picture
     /**
      * Initializes the camera and the preview.
      *
-     * An action listener is set on the [snapImage] to take pictures.
+     * An action listener is set on the [snap_image] to take pictures.
      *
      * This method is called once the correct permissions are granted.
      */
@@ -117,31 +117,31 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener, Camera.Picture
 
         cameraPreview = CameraPreview(this, camera)
 
-        previewFrame.addView(cameraPreview)
-        snapImage.setOnClickListener(this)
-        snapImage.tag = SNAP_TAG
+        preview_frame.addView(cameraPreview)
+        snap_image.setOnClickListener(this)
+        snap_image.tag = SNAP_TAG
     }
 
     /**
      * Reinitializes the state of the view.
      *
      * This method does the following:
-     *  - Set the [snapImage] source to its default
+     *  - Set the [snap_image] source to its default
      *  - Reset its tag to allow the user to take another picture
      *  - Restart the camera
      */
     private fun restartView() {
-        snapImage.setImageResource(SNAP_TAG)
-        snapImage.tag = SNAP_TAG
+        snap_image.setImageResource(SNAP_TAG)
+        snap_image.tag = SNAP_TAG
         restartCamera(camera)
     }
 
     /**
      * Handles the click event.
      *
-     * [snapImage]:
+     * [snap_image]:
      *  [SNAP_TAG]:
-     *      - Set the [snapImage] tag to [RESTART_TAG] to change its behavior
+     *      - Set the [snap_image] tag to [RESTART_TAG] to change its behavior
      *      - Disable the snapping feature
      *      - Take the picture
      *  [RESTART_TAG]:
@@ -151,10 +151,10 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener, Camera.Picture
      */
     override fun onClick(view: View) {
         when (view) {
-            snapImage -> {
-                if (snapImage.tag == SNAP_TAG) {
-                    snapImage.tag = RESTART_TAG
-                    snapImage.isEnabled = false
+            snap_image -> {
+                if (snap_image.tag == SNAP_TAG) {
+                    snap_image.tag = RESTART_TAG
+                    snap_image.isEnabled = false
                     camera.takePicture(null, null, this)
                 } else {
                     restartView()

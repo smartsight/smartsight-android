@@ -40,8 +40,8 @@ class PhotoProcessor(val activity: CameraActivity) : AsyncTask<String, String, S
         val animation = RotateAnimation(0.0f, 360.0f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f)
         animation.duration = 2000
         animation.repeatCount = -1
-        activity.snapImage.animation = animation
-        activity.snapImage.startAnimation(animation)
+        activity.snap_image.animation = animation
+        activity.snap_image.startAnimation(animation)
     }
 
     /**
@@ -118,7 +118,7 @@ class PhotoProcessor(val activity: CameraActivity) : AsyncTask<String, String, S
      */
     override fun onPostExecute(result: String) {
         clearView()
-        activity.snapImage.setImageResource(R.drawable.ic_restart)
+        activity.snap_image.setImageResource(R.drawable.ic_restart)
 
         if (!File(photoPath).delete()) {
             Log.e(TAG, "Can't delete photo")
@@ -163,7 +163,7 @@ class PhotoProcessor(val activity: CameraActivity) : AsyncTask<String, String, S
     }
 
     private fun clearView() {
-        activity.snapImage.clearAnimation()
-        activity.snapImage.isEnabled = true
+        activity.snap_image.clearAnimation()
+        activity.snap_image.isEnabled = true
     }
 }

@@ -9,7 +9,7 @@
     tools:context="com.smartsight.app.ui.CameraActivity">
 
     <FrameLayout
-        android:id="@+id/previewFrame"
+        android:id="@+id/preview_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorPrimaryDark" />
@@ -17,7 +17,7 @@
     <include layout="@layout/list_results" />
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/snapImage"
+        android:id="@+id/snap_image"
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:layout_margin="@dimen/activity_horizontal_margin"
