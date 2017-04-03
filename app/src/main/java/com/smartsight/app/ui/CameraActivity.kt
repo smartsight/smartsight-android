@@ -1,6 +1,9 @@
 package com.smartsight.app.ui
 
 import android.Manifest
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.hardware.Camera
 import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
@@ -15,6 +18,7 @@ import com.smartsight.app.R.string.*
 import com.smartsight.app.util.*
 import kotlinx.android.synthetic.main.activity_camera.*
 import kotlinx.android.synthetic.main.list_results.*
+import java.io.ByteArrayOutputStream
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
@@ -178,7 +182,15 @@ class CameraActivity : AppCompatActivity(), View.OnClickListener, Camera.Picture
             return
         }
 
-        output.write(data)
+        var bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
+        val matrix = Matrix()
+        matrix.postRotate(90f)
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, stream)
+
+        output.write(stream.toByteArray())
         output.close()
 
         PhotoProcessor(mActivity.get()!!).execute(picture.path)
